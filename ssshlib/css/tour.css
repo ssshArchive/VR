@@ -1,0 +1,158 @@
+/* 環景導覽共用樣式：地上白圈、標籤圓點、說明面板 */
+:root {
+  --tag: #f0b02e;
+  --sel: #ff7a45;
+  --font-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+[hidden] { display: none !important; }
+
+/* 地上的白圈（前往其他場景） */
+.floor-ring {
+  fill: rgba(255, 255, 255, 0.16) !important;
+  stroke: rgba(255, 255, 255, 0.95) !important;
+  stroke-width: 2.5px !important;
+  cursor: pointer;
+  transition: fill 0.15s ease;
+}
+.floor-ring:hover { fill: rgba(255, 255, 255, 0.42) !important; }
+.floor-ring.is-selected { stroke: var(--sel) !important; stroke-width: 3.5px !important; fill: rgba(255, 122, 69, 0.25) !important; }
+.floor-ring.is-broken { stroke: #ff5050 !important; stroke-dasharray: 6 4; }
+
+/* 直立的圓圈（目標在水平線以上，例如往樓上） */
+.go-ring {
+  display: block;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s ease;
+}
+.go-ring::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-left: 3px solid #fff;
+  border-top: 3px solid #fff;
+  transform: translate(-50%, -50%) rotate(var(--arrow, 0deg)) translateY(2px) rotate(45deg);
+}
+.go-ring:hover { background: rgba(255, 255, 255, 0.42); }
+.go-marker.is-selected .go-ring { border-color: var(--sel); background: rgba(255, 122, 69, 0.3); }
+.go-marker.is-broken .go-ring { border-color: #ff5050; border-style: dashed; }
+
+/* 滑鼠在地面移動時的游標圈 */
+.floor-cursor {
+  fill: rgba(255, 255, 255, 0.08) !important;
+  stroke: rgba(255, 255, 255, 0.75) !important;
+  stroke-width: 1.5px !important;
+  pointer-events: none !important;
+}
+
+/* 標籤圓點 */
+.tag-dot {
+  display: block;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--tag);
+  border: 3px solid #fff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  position: relative;
+}
+.tag-dot::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  background: #fff;
+}
+.tag-dot::before {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  animation: tag-ping 2.4s ease-out infinite;
+}
+.tag-marker.is-selected .tag-dot { background: var(--sel); box-shadow: 0 0 0 3px rgba(255, 122, 69, 0.5); }
+@keyframes tag-ping {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  80%, 100% { transform: scale(1.25); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tag-dot::before { animation: none; opacity: 0; }
+}
+
+/* 標籤點開後的說明面板（Photo Sphere Viewer 側邊面板） */
+.tag-panel { font-family: var(--font-body); line-height: 1.75; }
+.tag-panel img { display: block; width: auto; height: auto; max-width: 100%; max-height: 260px; margin: 0 auto 12px; border-radius: 6px; }
+/* Cardboard VR：左右眼中央的準心，外圈是注視進度 */
+.vr-reticle { display: none; position: absolute; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; z-index: 95; pointer-events: none; }
+.vr-active .vr-reticle { display: block; }
+.vr-reticle svg { width: 100%; height: 100%; overflow: visible; transition: transform 0.15s; }
+.vr-reticle.hot svg { transform: scale(1.35); }
+.vr-reticle .bg { fill: none; stroke: rgba(255, 255, 255, 0.35); stroke-width: 3; }
+.vr-reticle .fg { fill: none; stroke: #fff; stroke-width: 4; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 20px 20px; }
+.vr-reticle .dot { fill: #fff; stroke: rgba(0, 0, 0, 0.5); stroke-width: 1; }
+body.vr-on .bar, body.vr-on .map { display: none !important; }
+.vr-gear { display: none; position: absolute; top: 6px; left: 50%; transform: translateX(-50%); z-index: 96; padding: 6px 12px; border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 16px; background: rgba(0, 0, 0, 0.55); color: #fff; font: inherit; font-size: 13px; cursor: pointer; }
+.vr-active .vr-gear { display: block; }
+.vr-setup { position: absolute; top: 44px; left: 50%; transform: translateX(-50%); z-index: 97; width: min(420px, calc(100% - 24px)); padding: 12px; border-radius: 12px; background: rgba(12, 17, 15, 0.92); color: #fff; font-size: 14px; }
+.vr-setup[hidden] { display: none; }
+.vr-setup .row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+.vr-setup .lbl { width: 5em; }
+.vr-setup b { min-width: 6.5em; text-align: center; font-weight: 500; }
+.vr-setup p { margin: 8px 0; color: #c9d2cd; font-size: 13px; line-height: 1.6; }
+.vr-setup button { min-width: 44px; min-height: 36px; padding: 4px 12px; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #fff; font: inherit; font-size: 15px; cursor: pointer; }
+.vr-setup button.ok { background: #f0b429; border-color: #f0b429; color: #241a04; }
+.under-panel { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.15s; }
+.tag-panel h2 { margin: 4px 0 8px; font-size: 20px; letter-spacing: 0.04em; }
+.tag-panel p { margin: 0 0 6px; }
+.tag-panel a { color: #9fd8ff; text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
+.tag-panel a:hover { color: #c8eaff; }
+.tag-video { position: relative; aspect-ratio: 16 / 9; margin-bottom: 12px; border-radius: 6px; overflow: hidden; background: #000; }
+.tag-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.psv-tooltip-content { font-family: var(--font-body); }
+.psv-container { font-family: var(--font-body); }
+
+/* 平面圖（瀏覽頁的小地圖、編輯器的平面圖共用） */
+:root {
+  --pv-backdrop: rgba(255, 255, 255, 0.04);
+  --pv-grid: rgba(255, 255, 255, 0.10);
+  --pv-link: rgba(255, 255, 255, 0.55);
+  --pv-node: #ffffff;
+  --pv-node-stroke: #0b0f0d;
+  --pv-here: #f0b02e;
+  --pv-text: #eef3ef;
+  --pv-halo: rgba(8, 12, 10, 0.85);
+  --pv-cone: rgba(240, 176, 46, 0.38);
+}
+.pv-backdrop { fill: var(--pv-backdrop); }
+.pv-image { opacity: 0.92; }
+.pv-grid line { stroke: var(--pv-grid); stroke-width: 1px; vector-effect: non-scaling-stroke; }
+.pv-link { stroke: var(--pv-link); stroke-width: 2px; vector-effect: non-scaling-stroke; }
+.pv-link.manual { stroke-dasharray: 5 4; }
+.pv-node { cursor: pointer; }
+.pv-node circle { fill: var(--pv-node); stroke: var(--pv-node-stroke); }
+.pv-node:hover circle, .pv-node:focus-visible circle { fill: var(--pv-here); }
+.pv-node:focus { outline: none; }
+.pv-node.here circle { fill: var(--pv-here); stroke: #fff; }
+.pv-node.hl circle { fill: var(--sel); }
+.pv-node text {
+  fill: var(--pv-text);
+  stroke: var(--pv-halo);
+  paint-order: stroke;
+  text-anchor: middle;
+  font-family: var(--font-body);
+  pointer-events: none;
+}
+.pv-cone { fill: var(--pv-cone); }
+.pv-cone.unknown { fill: rgba(255, 255, 255, 0.12); }

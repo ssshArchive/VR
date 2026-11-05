@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>松山高中720環景</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="css/psv.css">
+<link rel="stylesheet" href="css/tour.css">
+<style>
+/* 全螢幕瀏覽頁：全景鋪滿畫面，左上角是區域與地點的下拉選單 */
+:root {
+  --stage: #0b0f0d;
+  --glass: rgba(12, 17, 15, 0.72);
+  --glass-line: rgba(255, 255, 255, 0.16);
+  --fg: #f1f5f2;
+  --muted: #b3c1b8;
+  --accent: #6fd3a0;
+  color-scheme: dark;
+}
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--stage);
+  color: var(--fg);
+  font-family: var(--font-body);
+  overflow: hidden;
+}
+#viewer { position: fixed; inset: 0; }
+
+.bar {
+  position: fixed;
+  z-index: 120;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  left: calc(12px + env(safe-area-inset-left, 0px));
+  max-width: calc(100% - 24px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  padding: 8px 10px 8px 14px;
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  border-radius: 10px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.bar h1 {
+  margin: 0 6px 0 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.field { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.field select {
+  font: inherit;
+  font-size: 14px;
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-line);
+  border-radius: 6px;
+  padding: 5px 28px 5px 10px;
+  max-width: 46vw;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 15px) 52%, calc(100% - 10px) 52%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+.field select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.field select option, .field select optgroup { color: #111; background: #fff; }
+
+.map {
+  position: fixed;
+  z-index: 115;
+  left: calc(12px + env(safe-area-inset-left, 0px));
+  bottom: calc(52px + env(safe-area-inset-bottom, 0px));
+  width: min(320px, calc(100% - 24px));
+  padding: 6px 8px 8px;
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  border-radius: 10px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.map-head { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); letter-spacing: 0.06em; }
+.map-head button { font: inherit; font-size: 13px; color: var(--fg); background: rgba(255, 255, 255, 0.1); border: 1px solid var(--glass-line); border-radius: 6px; padding: 5px 10px; min-height: 32px; cursor: pointer; }
+.map-head button:hover { background: rgba(255, 255, 255, 0.2); }
+#map-svg { display: block; width: 100%; height: 190px; margin-top: 4px; border-radius: 6px; }
+.map.collapsed .map-wrap { display: none; }
+.map-tools { display: flex; gap: 8px; }
+.map-wrap { position: relative; }
+.map-zoom { position: absolute; right: 6px; bottom: 6px; display: flex; flex-direction: column; gap: 4px; }
+.map-zoom button { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border-radius: 6px; border: 1px solid var(--glass-line); background: rgba(12, 17, 15, 0.72); color: #fff; font: inherit; font-size: 16px; line-height: 1; cursor: pointer; }
+.map-zoom button:hover { background: rgba(40, 48, 44, 0.9); }
+.map.big { width: min(760px, calc(100% - 24px)); }
+.map.big #map-svg { height: min(62vh, 560px); }
+
+.notice {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+  background: var(--stage);
+}
+.notice p { max-width: 34em; margin: 0; line-height: 1.7; }
+
+@media (max-width: 600px) {
+  .bar { right: calc(12px + env(safe-area-inset-right, 0px)); padding: 8px 10px; }
+  .bar h1 { width: 100%; font-size: 15px; }
+  .field { flex: 1 1 140px; min-width: 0; }
+  .field select { flex: 1; min-width: 0; max-width: none; width: 100%; }
+  #map-svg { height: 150px; }
+}
+</style>
+</head>
+<body>
+<div id="viewer"></div>
+
+<header class="bar">
+  <h1 id="title">環景導覽</h1>
+  <label class="field"><span>區域</span><select id="area-select"></select></label>
+  <label class="field"><span>地點</span><select id="scene-select"></select></label>
+</header>
+
+<div class="map" id="map" hidden>
+  <div class="map-head"><span id="map-title">平面圖</span><span class="map-tools"><button type="button" id="map-big" aria-pressed="false">放大地圖</button><button type="button" id="map-toggle" aria-expanded="true">收合</button></span></div>
+  <div class="map-wrap">
+    <svg id="map-svg" role="img" aria-label="拍攝點平面圖"></svg>
+    <div class="map-zoom">
+      <button type="button" id="map-in" title="放大" aria-label="放大">＋</button>
+      <button type="button" id="map-out" title="縮小" aria-label="縮小">－</button>
+      <button type="button" id="map-fit" title="顯示所有拍攝點" aria-label="顯示所有拍攝點"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<div class="notice" id="notice" hidden><p id="notice-text"></p></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "./lib/three-0.185.1/three.module.js",
+    "@photo-sphere-viewer/core": "./lib/photo-sphere-viewer-5.15.1/core.js",
+    "@photo-sphere-viewer/markers-plugin": "./lib/photo-sphere-viewer-5.15.1/markers-plugin.js",
+    "@photo-sphere-viewer/gyroscope-plugin": "./lib/photo-sphere-viewer-5.15.1/gyroscope-plugin.js",
+    "@photo-sphere-viewer/stereo-plugin": "./lib/photo-sphere-viewer-5.15.1/stereo-plugin.js"
+  }
+}
+</script>
+<script type="module">
+import { Viewer } from '@photo-sphere-viewer/core';
+import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
+import { GyroscopePlugin } from '@photo-sphere-viewer/gyroscope-plugin';
+import { StereoPlugin } from '@photo-sphere-viewer/stereo-plugin';
+import { Tour, Navigator, PlanView, placed, linkMarker, tagMarker, cursorMarker, tagHtml, viewOf, deg, LANG, keepClearOfPanel, CardboardVR } from './js/tour.js';
+
+const $ = (id) => document.getElementById(id);
+function notice(msg) { $('notice-text').textContent = msg; $('notice').hidden = false; }
+
+let data;
+try {
+  const res = await fetch('tour.json', { cache: 'no-cache' });
+  if (!res.ok) throw new Error(res.status);
+  data = await res.json();
+} catch (e) {
+  notice('讀不到 tour.json。請確認它和這個頁面在同一個資料夾，並透過網頁伺服器（http 或 https）開啟。');
+  throw e;
+}
+const tour = new Tour(data);
+const resolve = (p) => p;
+document.title = data.title || document.title;
+$('title').textContent = data.title || '環景導覽';
+
+const fromHash = tour.scene(decodeURIComponent(location.hash.slice(1)));
+const first = fromHash || tour.firstScene();
+if (!first) { notice('tour.json 裡還沒有任何場景。'); throw new Error('no scene'); }
+
+/* ---------------------------------------------------------- 下拉選單 */
+function fillAreas() {
+  const sel = $('area-select');
+  sel.innerHTML = '';
+  for (const a of data.areas) {
+    if (!a.scenes.length) continue;
+    const o = document.createElement('option');
+    o.value = a.id;
+    o.textContent = a.name;
+    sel.appendChild(o);
+  }
+}
+function fillScenes(area) {
+  const sel = $('scene-select');
+  sel.innerHTML = '';
+  for (const s of area.scenes) {
+    const o = document.createElement('option');
+    o.value = s.id;
+    o.textContent = s.name;
+    sel.appendChild(o);
+  }
+}
+/* ---------------------------------------------------------- 小地圖 */
+const plan = new PlanView($('map-svg'), { tour, resolve, labels: 'current', zoomable: true, onNode: (s) => nav.jump(s.id) });
+$('map-in').addEventListener('click', () => plan.zoomBy(1 / 1.6));
+$('map-out').addEventListener('click', () => plan.zoomBy(1.6));
+$('map-fit').addEventListener('click', () => plan.fit());
+$('map-big').addEventListener('click', () => {
+  const big = $('map').classList.toggle('big');
+  if (big && $('map').classList.contains('collapsed')) $('map-toggle').click();
+  $('map-big').textContent = big ? '縮小地圖' : '放大地圖';
+  $('map-big').setAttribute('aria-pressed', String(big));
+  plan.labels = big ? 'all' : 'current';
+  plan.render();
+});
+if (window.matchMedia('(max-width: 600px), (max-height: 500px)').matches) {
+  $('map').classList.add('collapsed');
+  $('map-toggle').textContent = '展開';
+}
+$('map-toggle').addEventListener('click', () => {
+  const c = $('map').classList.toggle('collapsed');
+  $('map-toggle').textContent = c ? '展開' : '收合';
+  $('map-toggle').setAttribute('aria-expanded', String(!c));
+  if (!c) plan.render();
+});
+function syncMap(scene) {
+  const area = tour.areaOf(scene.id);
+  const show = area.scenes.some(placed) && placed(scene);
+  $('map').hidden = !show;
+  if (!show) return;
+  $('map-title').textContent = area.name;
+  plan.current = scene;
+  if (plan.area === area) plan.ensureVisible(scene);
+  plan.setArea(area);
+}
+
+function syncSelects(scene) {
+  const area = tour.areaOf(scene.id);
+  if ($('area-select').value !== area.id) $('area-select').value = area.id;
+  fillScenes(area);
+  $('scene-select').value = scene.id;
+  syncMap(scene);
+  document.title = scene.name + '｜' + (data.title || '環景導覽');
+  try { history.replaceState(null, '', '#' + encodeURIComponent(scene.id)); } catch (e) { /* 忽略 */ }
+}
+fillAreas();
+$('area-select').addEventListener('change', (e) => {
+  const area = data.areas.find((a) => a.id === e.target.value);
+  const s = area && tour.areaStart(area);
+  if (s) nav.jump(s.id);
+});
+$('scene-select').addEventListener('change', (e) => nav.jump(e.target.value));
+
+/* ---------------------------------------------------------- 檢視器 */
+let viewer;
+try {
+  viewer = new Viewer({
+    container: $('viewer'),
+    panorama: resolve(first.file),
+    caption: first.name,
+    defaultYaw: viewOf(first).yaw,
+    defaultPitch: viewOf(first).pitch,
+    navbar: ['zoom', 'caption', 'stereo', 'fullscreen'],   // stereo 按鈕只在有陀螺儀的手機、平板出現
+    loadingTxt: '載入中…',
+    lang: LANG,
+    plugins: [[MarkersPlugin, { markers: [] }], [GyroscopePlugin, { touchmove: false }], StereoPlugin],
+  });
+} catch (e) {
+  notice('這個瀏覽器無法顯示全景（需要 WebGL），請改用新版 Chrome、Edge、Safari 或 Firefox。');
+  throw e;
+}
+const markers = viewer.getPlugin(MarkersPlugin);
+
+viewer.addEventListener('position-updated', ({ position }) => plan.setView(deg(position.yaw)));
+
+let vr = null;
+function build(scene) {
+  if (vr?.on) return vr.markersFor(scene);
+  const list = (scene.links || []).map((l, i) => linkMarker(tour, scene, l, i));
+  (scene.tags || []).forEach((t, i) => list.push(tagMarker(t, i, { content: tagHtml(t, resolve) })));
+  list.push(cursorMarker());
+  return list;
+}
+
+const nav = new Navigator({ viewer, markers, tour, resolve, build, onChange: syncSelects });
+keepClearOfPanel(viewer, $('viewer'), () => [document.querySelector('.bar'), $('map')]);
+vr = new CardboardVR({ viewer, markers, gyro: viewer.getPlugin(GyroscopePlugin), stereo: viewer.getPlugin(StereoPlugin), nav, tour });
+
+viewer.addEventListener('ready', () => {
+  nav.current = first;
+  nav.refresh();
+  syncSelects(first);
+  nav.preload(first);
+}, { once: true });
+
+markers.addEventListener('select-marker', ({ marker }) => {
+  if (vr?.on) return;
+  const d = marker.data || {};
+  if (d.type === 'link') nav.walk(nav.current.links[d.index]);
+});
+
+viewer.addEventListener('click', ({ data: c }) => {
+  if (c.rightclick || nav.busy || vr?.on) return;
+  const l = nav.linkToward(deg(c.yaw), deg(c.pitch));
+  if (l) nav.walk(l);
+});
+
+nav.attachCursor($('viewer'));
+
+window.addEventListener('hashchange', () => {
+  const s = tour.scene(decodeURIComponent(location.hash.slice(1)));
+  if (s && nav.current && s.id !== nav.current.id) nav.jump(s.id);
+});
+</script>
+</body>
+</html>
