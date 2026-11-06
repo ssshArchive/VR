@@ -1,6 +1,6 @@
 {
   "title": "環景導覽",
-  "cameraHeight": 1.2,
+  "cameraHeight": 1.5,
   "start": "s-mw3ngbhkwtf",
   "areas": [
     {
@@ -9,52 +9,9 @@
       "start": "s-mw3ngbhkwtf",
       "scenes": [
         {
-          "id": "s-mw3ngd2d7w0",
-          "name": "實驗大樓2F_化學教室二前",
-          "file": "panos/s-mw3ngd2d7w0.jpg",
-          "view": {
-            "yaw": -63.5,
-            "pitch": -7.8
-          },
-          "links": [
-            {
-              "to": "s-mw3ngctf7uk"
-            },
-            {
-              "to": "s-mw3ngbqdkn9"
-            }
-          ],
-          "tags": [],
-          "x": 44.81,
-          "y": 12.87
-        },
-        {
-          "id": "s-mw3ngctf7uk",
-          "name": "實驗大樓2F_化學教室一前",
-          "file": "panos/s-mw3ngctf7uk.jpg",
-          "view": {
-            "yaw": 51.8,
-            "pitch": -3.1
-          },
-          "links": [
-            {
-              "to": "s-mw3ng973p9b"
-            },
-            {
-              "to": "s-mw3ngbqdkn9"
-            },
-            {
-              "to": "s-mw3ngd2d7w0"
-            }
-          ],
-          "tags": [],
-          "x": 37.44,
-          "y": 12.87
-        },
-        {
           "id": "s-mw3ngbqdkn9",
           "name": "圖書館2F_網管中心前",
-          "file": "panos/s-mw3ngbqdkn9.jpg",
+          "file": "panos/s-mw3ngbqdkn9-mw4kdasu.jpg",
           "view": {
             "yaw": 0,
             "pitch": 0
@@ -67,14 +24,6 @@
               "to": "s-mw3ng973p9b",
               "yaw": -12.6,
               "pitch": -13.1
-            },
-            {
-              "to": "s-mw3ngctf7uk",
-              "yaw": 177.1,
-              "pitch": -18
-            },
-            {
-              "to": "s-mw3ngd2d7w0"
             }
           ],
           "tags": [],
@@ -99,9 +48,6 @@
             },
             {
               "to": "s-mw3ngbqdkn9"
-            },
-            {
-              "to": "s-mw3ngctf7uk"
             }
           ],
           "tags": [],
@@ -113,36 +59,34 @@
           "name": "圖書館2F_iLearn門口",
           "file": "panos/s-mw3ng8n6nlq.jpg",
           "view": {
-            "yaw": 103.1,
-            "pitch": 2.4
+            "yaw": 126.5,
+            "pitch": -2.5
           },
           "links": [
-            {
-              "to": "s-mw3ngbhkwtf"
-            },
             {
               "to": "s-mw3ng973p9b"
             },
             {
               "to": "s-mw3ngbqdkn9"
+            },
+            {
+              "to": "s-mw3ngbhkwtf"
             }
           ],
           "tags": [],
           "x": 30.35,
-          "y": 19.33
+          "y": 19.33,
+          "heading": 184.5
         },
         {
           "id": "s-mw3ngbhkwtf",
           "name": "圖書館2F_資訊檢索區",
           "file": "panos/s-mw3ngbhkwtf.jpg",
           "view": {
-            "yaw": -116,
-            "pitch": -1
+            "yaw": -164.7,
+            "pitch": -3.9
           },
           "links": [
-            {
-              "to": "s-mw3ng8n6nlq"
-            },
             {
               "to": "s-mw3ng973p9b",
               "yaw": -160.6,
@@ -152,9 +96,20 @@
               "to": "s-mw3ngc0yoty",
               "yaw": 19.8,
               "pitch": -31
+            },
+            {
+              "to": "s-mw3ng8n6nlq"
             }
           ],
-          "tags": [],
+          "tags": [
+            {
+              "yaw": -153.1,
+              "pitch": 1,
+              "title": "圖書館2樓",
+              "text": "書庫4000冊\n討論室4間\n閱覽區\n小說區\n資料檢索區\n",
+              "images": []
+            }
+          ],
           "x": 21.59,
           "y": 16.41,
           "heading": 296.9
@@ -223,7 +178,9 @@
           },
           "links": [
             {
-              "to": "s-mw3ng8xm4x9"
+              "to": "s-mw3ng8xm4x9",
+              "yaw": -92.2,
+              "pitch": -19.3
             },
             {
               "to": "s-mw3ng9ro277"
@@ -232,10 +189,14 @@
               "to": "s-mw3ngb9eeq2"
             },
             {
-              "to": "s-mw3ngb0v585"
+              "to": "s-mw3ngb0v585",
+              "yaw": 72.2,
+              "pitch": -32.6
             },
             {
-              "to": "s-mw3ngasjctt"
+              "to": "s-mw3ngasjctt",
+              "yaw": 150.5,
+              "pitch": -37.5
             },
             {
               "to": "s-mw3ngc0yoty"
@@ -243,7 +204,8 @@
           ],
           "tags": [],
           "x": 12.95,
-          "y": 7.86
+          "y": 7.86,
+          "heading": 137.7
         },
         {
           "id": "s-mw3ng9ro277",
