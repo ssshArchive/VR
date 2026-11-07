@@ -1,7 +1,7 @@
 {
   "title": "環景導覽",
   "cameraHeight": 1.5,
-  "start": "s-mw3ngbhkwtf",
+  "start": "s-mw669klcl0r",
   "areas": [
     {
       "id": "area-mw3neruul9n",
@@ -326,7 +326,7 @@
     {
       "id": "area-mw668baucw4",
       "name": "圖書館一樓",
-      "start": "s-mw669kcmqe1",
+      "start": "s-mw669lcdqkx",
       "scenes": [
         {
           "id": "s-mw669kcmqe1",
@@ -353,8 +353,8 @@
           "name": "圖書館1F_展覽區",
           "file": "panos/圖書館一樓/圖書館1F_展覽區.jpg",
           "view": {
-            "yaw": 0,
-            "pitch": 0
+            "yaw": 12.2,
+            "pitch": -0.7
           },
           "links": [
             {
