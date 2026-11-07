@@ -36,8 +36,11 @@ export const esc = (s) =>
   String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 export const FLOOR_LIMIT = -3;   // 手動白圈 pitch 低於這個角度就畫在地上
-const RING_R = 0.42;             // 地上白圈半徑（公尺）
-const CURSOR_R = 0.3;            // 滑鼠游標圈半徑
+const RING_R = 0.2;              // 地上白圈半徑（公尺），和 Matterport 一樣
+const RING_IN = 0.65;            // 白環內緣（半徑的比例），以內鏤空
+const RING_OUT = 0.97;           // 白環外緣（半徑的比例）
+const RING_HIT = 0.3;            // 滑鼠落在白圈中心幾公尺內就算指到（白圈本身 0.2，放寬一點）
+const RING_HIT_PX = 18;          // 遠處的白圈在畫面上很小：離圓心幾像素內也算指到
 
 export const placed = (s) => !!s && Number.isFinite(s.x) && Number.isFinite(s.y);
 export const isManual = (l) => Number.isFinite(l.yaw) && Number.isFinite(l.pitch);
@@ -60,7 +63,8 @@ export class Tour {
   scene(id) { return this.byId.get(id); }
   areaOf(id) { return this.areaById.get(id); }
   areaStart(area) {
-    return (area.start && this.areaOf(area.start) === area && this.scene(area.start)) || area.scenes[0] || null;
+    return (area.start && this.areaOf(area.start) === area && this.scene(area.start))
+      || area.scenes.find((s) => !s.transit) || area.scenes[0] || null;   // 過渡場景不當起點
   }
   firstScene() {
     const s = this.scene(this.data.start);
@@ -112,6 +116,11 @@ export function floorRing(yawDeg, pitchDeg, H, r = RING_R, n = 36) {
     pts.push([Math.atan2(px, py), -Math.atan2(H, Math.hypot(px, py))]);
   }
   return pts;
+}
+
+/* 地上的白圈（照 Matterport）：外緣、內緣兩個圓，中間挖空，只留一圈白環 */
+export function floorPuck(yawDeg, pitchDeg, H, r = RING_R) {
+  return [floorRing(yawDeg, pitchDeg, H, r * RING_OUT, 40), floorRing(yawDeg, pitchDeg, H, r * RING_IN, 40)];
 }
 
 /* ------------------------------------------------------------ 標記 */
@@ -172,6 +181,61 @@ export function arrowStyle(link) {
   return Number.isFinite(a) && a % 360 !== 0 ? ` style="--arrow:${a}deg"` : '';
 }
 
+/* 白圈要顯示的目的地名稱：目標是過渡場景（transit）時，往前找到下一個主要場景；
+   找不到或有好幾個岔路，就用過渡場景自己的名稱 */
+export function destScene(tour, from, to) {
+  if (!to || !to.transit) return to;
+  const seen = new Set([from && from.id, to.id]);
+  let frontier = [to];
+  for (let step = 0; step < 12 && frontier.length; step++) {
+    const next = [], found = new Set();
+    for (const s of frontier) {
+      for (const l of s.links || []) {
+        const t = tour.scene(l.to);
+        if (!t || seen.has(t.id)) continue;
+        seen.add(t.id);
+        if (t.transit) next.push(t); else found.add(t);
+      }
+    }
+    if (found.size === 1 && !next.length) return [...found][0];
+    if (found.size) return to;
+    frontier = next;
+  }
+  return to;
+}
+
+/* 站在過渡場景時，「地點」選單要顯示的主要場景：平面圖上最近的；沒放平面圖就沿白圈找最少步的 */
+export function nearestMain(tour, scene) {
+  if (!scene || !scene.transit) return scene;
+  const area = tour.areaOf(scene.id);
+  const mains = (area?.scenes || []).filter((s) => !s.transit);
+  if (placed(scene)) {
+    let best = null, bd = Infinity;
+    for (const s of mains) {
+      if (!placed(s)) continue;
+      const d = Math.hypot(s.x - scene.x, s.y - scene.y);
+      if (d < bd) { bd = d; best = s; }
+    }
+    if (best) return best;
+  }
+  const seen = new Set([scene.id]);
+  let frontier = [scene];
+  while (frontier.length) {
+    const next = [];
+    for (const s of frontier) {
+      for (const l of s.links || []) {
+        const t = tour.scene(l.to);
+        if (!t || seen.has(t.id)) continue;
+        seen.add(t.id);
+        if (!t.transit && tour.areaOf(t.id) === area) return t;
+        next.push(t);
+      }
+    }
+    frontier = next;
+  }
+  return mains[0] || scene;
+}
+
 /* 回傳 null 表示這個連結目前畫不出來（例如自動白圈但還沒放到平面圖） */
 export function linkMarker(tour, scene, link, i, selected = false) {
   const g = linkGeom(tour, scene, link);
@@ -179,15 +243,17 @@ export function linkMarker(tour, scene, link, i, selected = false) {
   const t = tour.scene(link.to);
   const fromArea = tour.areaOf(scene.id);
   const toArea = t && tour.areaOf(t.id);
-  const label = t ? '前往 ' + t.name + (toArea && toArea !== fromArea ? '（' + toArea.name + '）' : '') : '連結的場景不存在';
-  const cls = (selected ? ' is-selected' : '') + (t ? '' : ' is-broken');
+  const d = destScene(tour, scene, t);
+  const dArea = d && tour.areaOf(d.id);
+  const label = t ? '前往 ' + d.name + (dArea && dArea !== fromArea ? '（' + dArea.name + '）' : '') : '連結的場景不存在';
+  const cls = (selected ? ' is-selected' : '') + (t ? '' : ' is-broken') + (t && t.transit ? ' to-transit' : '');
   const base = {
     id: 'link-' + i,
-    tooltip: { content: esc(label), position: 'top center' },
+    tooltip: { content: esc(label), position: 'top center', className: 'link-tip' },
     data: { type: 'link', index: i },
   };
   if (g.pitch <= FLOOR_LIMIT) {
-    return { ...base, polygon: floorRing(g.yaw, g.pitch, tour.H), className: 'floor-ring' + cls, zIndex: 5 };
+    return { ...base, polygon: floorPuck(g.yaw, g.pitch, tour.H), className: 'floor-ring' + cls, zIndex: 5 };
   }
   return {
     ...base,
@@ -219,7 +285,7 @@ export function tagMarker(tag, i, { selected = false, content = null } = {}) {
 export function cursorMarker() {
   return {
     id: 'cursor',
-    polygon: floorRing(0, -30, 1.5, CURSOR_R, 24),
+    polygon: floorPuck(0, -30, 1.5),   // 和地上白圈同樣大小、同樣樣式
     className: 'floor-cursor',
     opacity: 0,
     data: { type: 'cursor' },
@@ -266,7 +332,21 @@ export class Navigator {
   }
 
   refresh() {
+    this.nearId = null;
+    this.tipId = null;
     if (this.current) this.markers.setMarkers(this.build(this.current).filter(Boolean));
+  }
+
+  /* 游標圈在地面上時，把它朝向的那個白圈標成 near（和滑鼠指到一樣變亮） */
+  markNear(link) {
+    const i = link ? (this.current?.links || []).indexOf(link) : -1;
+    const id = i >= 0 ? 'link-' + i : null;
+    if (id === this.nearId) return;
+    for (const [x, on] of [[this.nearId, false], [id, true]]) {
+      if (!x) continue;
+      try { this.markers.getMarker(x).domElement?.classList.toggle('near', on); } catch (e) { /* 標記已不存在 */ }
+    }
+    this.nearId = id;
   }
 
   async show(scene, position, transition, zoom) {
@@ -335,6 +415,54 @@ export class Navigator {
     }
   }
 
+  /* 滑鼠底下的地上白圈：白圈中間是空的，只靠瀏覽器判斷的話要剛好指在白環上才算，
+     所以自己算：地面上離圓心 RING_HIT 公尺內，或畫面上離圓心 RING_HIT_PX 像素內（遠處很小的白圈）。
+     vx、vy 是滑鼠在全景畫面裡的座標（像素）。 */
+  linkUnder(yawDeg, pitchDeg, vx, vy) {
+    if (!this.current || pitchDeg > -2) return null;
+    const H = this.tour.H;
+    const d = floorDistance(pitchDeg, H);
+    const mx = d * Math.sin(rad(yawDeg));
+    const my = d * Math.cos(rad(yawDeg));
+    let best = null;
+    for (const l of this.current.links || []) {
+      if (!this.tour.scene(l.to)) continue;
+      const g = linkGeom(this.tour, this.current, l);
+      if (!g || g.pitch > FLOOR_LIMIT || Math.abs(norm180(g.yaw - yawDeg)) > 60) continue;
+      const gd = floorDistance(g.pitch, H);
+      const m = Math.hypot(gd * Math.sin(rad(g.yaw)) - mx, gd * Math.cos(rad(g.yaw)) - my) / RING_HIT;
+      let px = Infinity;
+      if (Number.isFinite(vx) && Number.isFinite(vy)) {
+        try {
+          const c = this.viewer.dataHelper.sphericalCoordsToViewerCoords({ yaw: rad(g.yaw), pitch: rad(g.pitch) });
+          px = Math.hypot(c.x - vx, c.y - vy) / RING_HIT_PX;
+        } catch (e) { /* 算不出來就只看地面距離 */ }
+      }
+      const score = Math.min(m, px);
+      if (score <= 1 && (!best || score < best.score)) best = { l, score };
+    }
+    return best && best.l;
+  }
+
+  /* 點地面或游標圈要指向哪個白圈：先看滑鼠底下有沒有白圈，沒有才找那個方向最接近的 */
+  linkAt(yawDeg, pitchDeg, vx, vy) {
+    return this.linkUnder(yawDeg, pitchDeg, vx, vy) || this.linkToward(yawDeg, pitchDeg);
+  }
+
+  /* 滑鼠在白圈上（含中間鏤空的地方）時，固定顯示它的「前往 ○○」 */
+  showTip(link) {
+    const i = link ? (this.current?.links || []).indexOf(link) : -1;
+    let id = i >= 0 ? 'link-' + i : null;
+    if (id === this.tipId) return;
+    if (this.tipId) {
+      try { this.markers.hideMarkerTooltip(this.tipId); } catch (e) { /* 標記已不存在 */ }
+    }
+    if (id) {
+      try { this.markers.showMarkerTooltip(id); } catch (e) { id = null; }
+    }
+    this.tipId = id;
+  }
+
   /* 點地面：找出那個方向最接近的連結 */
   linkToward(yawDeg, pitchDeg) {
     if (!this.current || pitchDeg > -2) return null;
@@ -351,6 +479,8 @@ export class Navigator {
 
   /* 游標圈只更新自己（render = false），不然外掛會把打開中的說明面板整個重畫：捲動跳回頂端、影片被重新載入 */
   hideCursor() {
+    this.markNear(null);
+    this.showTip(null);
     if (this.cursorHidden) return;
     try {
       this.markers.updateMarker({ id: 'cursor', opacity: 0 }, false);
@@ -379,8 +509,12 @@ export class Navigator {
         } catch (err) { return; }
         const p = pos && deg(pos.pitch);
         if (!pos || p > -4 || floorDistance(p, this.tour.H) > 12) { this.hideCursor(); return; }
+        const vx = last.clientX - r.left, vy = last.clientY - r.top;
+        const under = this.linkUnder(deg(pos.yaw), p, vx, vy);
+        this.showTip(under);
+        this.markNear(under || this.linkToward(deg(pos.yaw), p));
         try {
-          this.markers.updateMarker({ id: 'cursor', opacity: 1, polygon: floorRing(deg(pos.yaw), p, this.tour.H, CURSOR_R, 24) }, false);
+          this.markers.updateMarker({ id: 'cursor', opacity: 1, polygon: floorPuck(deg(pos.yaw), p, this.tour.H) }, false);
           this.cursorHidden = false;
           this.viewer.needsUpdate();
         } catch (err) { /* 標記尚未建立 */ }
@@ -424,7 +558,8 @@ function svgEl(tag, attrs = {}, parent = null) {
  * 瀏覽頁用來顯示小地圖，編輯器用來拖曳拍攝點、連線、設定比例尺。
  */
 export class PlanView {
-  constructor(svg, { tour, resolve = (p) => p, onNode = null, zoomable = false, labels = 'all', fitTo = 'points' } = {}) {
+  constructor(svg, { tour, resolve = (p) => p, onNode = null, zoomable = false, labels = 'all', fitTo = 'points', showTransit = false } = {}) {
+    this.showTransit = showTransit;   // 導覽頁不畫過渡場景的點，編輯器要畫
     this.fitMode = fitTo;   // 'points' = 對準拍攝點，'all' = 整張底圖
     this.svg = svg;
     this.tour = tour;
@@ -626,8 +761,10 @@ export class PlanView {
     for (const s of this.area.scenes) {
       if (!placed(s)) continue;
       const isCur = this.current && this.current.id === s.id;
+      const hideT = s.transit && !this.showTransit;
+      if (hideT && !isCur) continue;   // 過渡場景：只有站在上面時才顯示目前位置
       const g = svgEl('g', {
-        class: 'pv-node' + (isCur ? ' here' : '') + (this.highlight.has(s.id) ? ' hl' : '') + (Number.isFinite(s.heading) ? '' : ' no-heading'),
+        class: 'pv-node' + (isCur ? ' here' : '') + (this.highlight.has(s.id) ? ' hl' : '') + (Number.isFinite(s.heading) ? '' : ' no-heading') + (s.transit ? ' transit' : ''),
         'data-id': s.id,
         transform: `translate(${s.x} ${-s.y})`,
         tabindex: '0',
@@ -636,8 +773,8 @@ export class PlanView {
       }, nodes);
       const title = svgEl('title', {}, g);
       title.textContent = s.name;
-      svgEl('circle', { r: (isCur ? 8 : 6.5) * u, 'stroke-width': 2 * u }, g);
-      if (this.labels === 'all' || (this.labels === 'current' && isCur)) {
+      svgEl('circle', { r: (isCur ? 8 : s.transit ? 4.5 : 6.5) * u, 'stroke-width': 2 * u }, g);
+      if (!hideT && (this.labels === 'all' || (this.labels === 'current' && isCur))) {
         const t = svgEl('text', { y: -11 * u, 'font-size': 11.5 * u, 'stroke-width': 3 * u }, g);
         t.textContent = s.name;
       }
@@ -707,16 +844,22 @@ function vrLabel(g, text, x, y, maxW, size = 38) {
 }
 function vrRing(label, arrow) {
   return vrTexture(`ring|${label}|${arrow}`, 256, 320, (g, w) => {
-    const cx = w / 2, cy = 118;
+    const cx = w / 2, cy = 118, R = 100;
+    /* 和地上的白圈同樣比例（照 Matterport）：白環在半徑 65%～97%，內外緣淡淡的黑邊，中心鏤空 */
+    const band = (r0, r1, color) => {
+      g.beginPath();
+      g.arc(cx, cy, r1, 0, Math.PI * 2);
+      g.arc(cx, cy, r0, 0, Math.PI * 2, true);
+      g.fillStyle = color;
+      g.fill();
+    };
+    band(R * RING_OUT, R, 'rgba(0, 0, 0, 0.1)');
+    band(R * RING_IN, R * RING_OUT, 'rgba(255, 255, 255, 0.64)');
+    band(R * 0.62, R * RING_IN, 'rgba(0, 0, 0, 0.13)');
     g.shadowColor = 'rgba(0, 0, 0, 0.6)';
     g.shadowBlur = 10;
-    g.beginPath();
-    g.arc(cx, cy, 96, 0, Math.PI * 2);
-    g.fillStyle = 'rgba(255, 255, 255, 0.18)';
-    g.fill();
-    g.lineWidth = 14;
+    g.lineWidth = 12;
     g.strokeStyle = '#fff';
-    g.stroke();
     g.save();
     g.translate(cx, cy);
     g.rotate(rad(arrow || 0));
@@ -933,8 +1076,9 @@ export class CardboardVR {
       if (!g || !t) return;
       const yaw = rad(g.yaw);
       const pitch = rad(Math.max(-45, Math.min(45, g.pitch)));
-      const ta = this.tour.areaOf(t.id);
-      const label = t.name + (ta && ta !== this.tour.areaOf(scene.id) ? `（${ta.name}）` : '');
+      const dt = destScene(this.tour, scene, t);
+      const ta = this.tour.areaOf(dt.id);
+      const label = dt.name + (ta && ta !== this.tour.areaOf(scene.id) ? `（${ta.name}）` : '');
       list.push({ id: 'vr-link-' + i, imageLayer: vrRing(label, Number(l.arrow) || 0), position: { yaw, pitch }, size: { width: 180, height: 225 }, data: { type: 'vr' } });
       this.targets.push({ kind: 'link', link: l, yaw, pitch });
     });

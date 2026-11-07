@@ -159,9 +159,10 @@ import { Viewer } from '@photo-sphere-viewer/core';
 import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
 import { GyroscopePlugin } from '@photo-sphere-viewer/gyroscope-plugin';
 import { StereoPlugin } from '@photo-sphere-viewer/stereo-plugin';
-import { Tour, Navigator, PlanView, placed, linkMarker, tagMarker, cursorMarker, tagHtml, viewOf, deg, LANG, keepClearOfPanel, CardboardVR } from './js/tour.js';
+import { Tour, Navigator, PlanView, placed, linkMarker, tagMarker, cursorMarker, tagHtml, viewOf, deg, LANG, keepClearOfPanel, CardboardVR, nearestMain, destScene, linkGeom, norm180 } from './js/tour.js';
 
 const $ = (id) => document.getElementById(id);
+document.body.classList.add('tour-view');   // 白圈用導覽時的透明度（平常 30%，指到時 100%）
 function notice(msg) { $('notice-text').textContent = msg; $('notice').hidden = false; }
 
 let data;
@@ -198,6 +199,7 @@ function fillScenes(area) {
   const sel = $('scene-select');
   sel.innerHTML = '';
   for (const s of area.scenes) {
+    if (s.transit) continue;   // 過渡場景不出現在選單
     const o = document.createElement('option');
     o.value = s.id;
     o.textContent = s.name;
@@ -242,7 +244,7 @@ function syncSelects(scene) {
   const area = tour.areaOf(scene.id);
   if ($('area-select').value !== area.id) $('area-select').value = area.id;
   fillScenes(area);
-  $('scene-select').value = scene.id;
+  if (scene.transit) setToward(scene); else $('scene-select').value = scene.id;
   syncMap(scene);
   document.title = scene.name + '｜' + (data.title || '環景導覽');
   try { history.replaceState(null, '', '#' + encodeURIComponent(scene.id)); } catch (e) { /* 忽略 */ }
@@ -253,7 +255,45 @@ $('area-select').addEventListener('change', (e) => {
   const s = area && tour.areaStart(area);
   if (s) nav.jump(s.id);
 });
-$('scene-select').addEventListener('change', (e) => nav.jump(e.target.value));
+/* 站在過渡場景時：選單最上面一項是「往 ○○」，○○ 是面朝方向上的主要場景 */
+function towardMain(scene) {
+  const yaw = deg(viewer.getPosition().yaw);
+  let best = null, bd = Infinity;
+  for (const l of scene.links || []) {
+    const t = tour.scene(l.to);
+    const g = t && linkGeom(tour, scene, l);
+    if (!g) continue;
+    const d = destScene(tour, scene, t);
+    if (!d || d.transit) continue;   // 前面是岔路，判斷不出要去哪
+    const diff = Math.abs(norm180(g.yaw - yaw));
+    if (diff < bd) { bd = diff; best = d; }
+  }
+  return best || nearestMain(tour, scene);
+}
+function setToward(scene = nav.current) {
+  const sel = $('scene-select');
+  let o = sel.querySelector('option[value="__toward"]');
+  if (!scene || !scene.transit) { o?.remove(); return; }
+  const t = towardMain(scene);
+  if (!t) return;
+  if (!o) {
+    o = document.createElement('option');
+    o.value = '__toward';
+    sel.prepend(o);
+  }
+  if (o.dataset.to !== t.id) {
+    o.textContent = '往 ' + t.name;
+    o.dataset.to = t.id;
+  }
+  if (document.activeElement !== sel) sel.value = '__toward';
+}
+$('scene-select').addEventListener('change', (e) => {
+  const v = e.target.value === '__toward' ? e.target.selectedOptions[0]?.dataset.to : e.target.value;
+  if (v) nav.jump(v);
+});
+/* 打開選單時先清空，這樣選「往 ○○」或同一個場景也會跳過去 */
+$('scene-select').addEventListener('focus', () => { if (nav.current?.transit) $('scene-select').value = ''; });
+$('scene-select').addEventListener('blur', () => { if (nav.current?.transit && !$('scene-select').value) setToward(); });
 
 /* ---------------------------------------------------------- 檢視器 */
 let viewer;
@@ -275,7 +315,10 @@ try {
 }
 const markers = viewer.getPlugin(MarkersPlugin);
 
-viewer.addEventListener('position-updated', ({ position }) => plan.setView(deg(position.yaw)));
+viewer.addEventListener('position-updated', ({ position }) => {
+  plan.setView(deg(position.yaw));
+  if (nav.current?.transit) setToward();   // 轉身時「往 ○○」跟著變
+});
 
 let vr = null;
 function build(scene) {
@@ -305,7 +348,7 @@ markers.addEventListener('select-marker', ({ marker }) => {
 
 viewer.addEventListener('click', ({ data: c }) => {
   if (c.rightclick || nav.busy || vr?.on) return;
-  const l = nav.linkToward(deg(c.yaw), deg(c.pitch));
+  const l = nav.linkAt(deg(c.yaw), deg(c.pitch), c.viewerX, c.viewerY);   // 先看點到的白圈，沒有才找那個方向的
   if (l) nav.walk(l);
 });
 

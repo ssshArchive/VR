@@ -7,17 +7,25 @@
 }
 [hidden] { display: none !important; }
 
-/* 地上的白圈（前往其他場景） */
+/* 地上的白圈（前往其他場景），照 Matterport：
+   半徑 0.2 公尺；白環在半徑 65%～97%（白色、不透明度 0.64），內外緣各有一圈很淡的黑邊，中心鏤空。
+   導覽頁（和編輯器的預覽）平常整個圈 30%，滑鼠指到或游標圈朝向它時，0.3 秒內變成 100%；
+   編輯器編輯時固定 90%，方便看清楚。主要場景、過渡場景都一樣。 */
 .floor-ring {
-  fill: rgba(255, 255, 255, 0.16) !important;
-  stroke: rgba(255, 255, 255, 0.95) !important;
-  stroke-width: 2.5px !important;
+  fill: rgba(255, 255, 255, 0.64) !important;
+  fill-rule: evenodd;
+  stroke: rgba(0, 0, 0, 0.12) !important;
+  stroke-width: 1px !important;
+  opacity: 0.9 !important;
   cursor: pointer;
-  transition: fill 0.15s ease;
+  transition: opacity 0.3s ease;
 }
-.floor-ring:hover { fill: rgba(255, 255, 255, 0.42) !important; }
-.floor-ring.is-selected { stroke: var(--sel) !important; stroke-width: 3.5px !important; fill: rgba(255, 122, 69, 0.25) !important; }
-.floor-ring.is-broken { stroke: #ff5050 !important; stroke-dasharray: 6 4; }
+.tour-view .floor-ring { opacity: 0.3 !important; }
+.floor-ring:hover, .floor-ring.near { opacity: 1 !important; }
+.floor-ring.is-selected { fill: rgba(255, 122, 69, 0.85) !important; opacity: 1 !important; }
+.floor-ring.is-broken { stroke: #ff5050 !important; stroke-width: 1.5px !important; stroke-dasharray: 6 4; opacity: 1 !important; }
+/* 白圈的「前往 ○○」由程式固定顯示時，不要擋住滑鼠（否則點不到後面的地面） */
+.psv-tooltip.link-tip { pointer-events: none !important; }
 
 /* 直立的圓圈（目標在水平線以上，例如往樓上） */
 .go-ring {
@@ -47,11 +55,12 @@
 .go-marker.is-selected .go-ring { border-color: var(--sel); background: rgba(255, 122, 69, 0.3); }
 .go-marker.is-broken .go-ring { border-color: #ff5050; border-style: dashed; }
 
-/* 滑鼠在地面移動時的游標圈 */
+/* 滑鼠在地面移動時的游標圈：和地上白圈同樣的樣子（白環、中心鏤空），顯示時不透明度 100%（由標記的 opacity 控制） */
 .floor-cursor {
-  fill: rgba(255, 255, 255, 0.08) !important;
-  stroke: rgba(255, 255, 255, 0.75) !important;
-  stroke-width: 1.5px !important;
+  fill: rgba(255, 255, 255, 0.64) !important;
+  fill-rule: evenodd;
+  stroke: rgba(0, 0, 0, 0.12) !important;
+  stroke-width: 1px !important;
   pointer-events: none !important;
 }
 
@@ -113,6 +122,7 @@ body.vr-on .bar, body.vr-on .map { display: none !important; }
 .vr-setup p { margin: 8px 0; color: #c9d2cd; font-size: 13px; line-height: 1.6; }
 .vr-setup button { min-width: 44px; min-height: 36px; padding: 4px 12px; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 8px; background: rgba(255, 255, 255, 0.1); color: #fff; font: inherit; font-size: 15px; cursor: pointer; }
 .vr-setup button.ok { background: #f0b429; border-color: #f0b429; color: #241a04; }
+/* 通往過渡場景的白圈：導覽頁（和編輯器預覽）平常看不到，滑鼠經過或游標圈靠近時以 90% 透明度隱約出現 */
 .under-panel { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.15s; }
 .tag-panel h2 { margin: 4px 0 8px; font-size: 20px; letter-spacing: 0.04em; }
 .tag-panel p { margin: 0 0 6px; }
@@ -145,6 +155,8 @@ body.vr-on .bar, body.vr-on .map { display: none !important; }
 .pv-node:hover circle, .pv-node:focus-visible circle { fill: var(--pv-here); }
 .pv-node:focus { outline: none; }
 .pv-node.here circle { fill: var(--pv-here); stroke: #fff; }
+.pv-node.transit:not(.here) circle { fill: #b9c2bd; }
+.pv-node.transit text { opacity: 0.7; }
 .pv-node.hl circle { fill: var(--sel); }
 .pv-node text {
   fill: var(--pv-text);

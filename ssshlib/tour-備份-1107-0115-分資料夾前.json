@@ -1,0 +1,311 @@
+{
+  "title": "環景導覽",
+  "cameraHeight": 1.5,
+  "start": "s-mw3ngbhkwtf",
+  "areas": [
+    {
+      "id": "area-mw3neruul9n",
+      "name": "圖書館二樓",
+      "start": "s-mw3ngbhkwtf",
+      "scenes": [
+        {
+          "id": "s-mw3ngbqdkn9",
+          "name": "圖書館2F_網管中心前",
+          "file": "panos/圖書館二樓-圖書館2F_網管中心前.jpg",
+          "view": {
+            "yaw": 0,
+            "pitch": 0
+          },
+          "links": [
+            {
+              "to": "s-mw3ng8n6nlq"
+            },
+            {
+              "to": "s-mw3ng973p9b",
+              "yaw": -12.6,
+              "pitch": -13.1
+            }
+          ],
+          "tags": [],
+          "x": 37.81,
+          "y": 19.57,
+          "heading": 186.3
+        },
+        {
+          "id": "s-mw3ng973p9b",
+          "name": "圖書館2F_走廊",
+          "file": "panos/圖書館二樓-圖書館2F_走廊.jpg",
+          "view": {
+            "yaw": 33.2,
+            "pitch": -9.6
+          },
+          "links": [
+            {
+              "to": "s-mw3ngbhkwtf"
+            },
+            {
+              "to": "s-mw3ng8n6nlq"
+            },
+            {
+              "to": "s-mw3ngbqdkn9"
+            }
+          ],
+          "tags": [],
+          "x": 30.61,
+          "y": 12.98
+        },
+        {
+          "id": "s-mw3ng8n6nlq",
+          "name": "圖書館2F_iLearn門口",
+          "file": "panos/圖書館二樓-圖書館2F_iLearn門口.jpg",
+          "view": {
+            "yaw": 126.5,
+            "pitch": -2.5
+          },
+          "links": [
+            {
+              "to": "s-mw3ng973p9b"
+            },
+            {
+              "to": "s-mw3ngbqdkn9"
+            },
+            {
+              "to": "s-mw3ngbhkwtf"
+            }
+          ],
+          "tags": [],
+          "x": 30.35,
+          "y": 19.33,
+          "heading": 184.5
+        },
+        {
+          "id": "s-mw3ngbhkwtf",
+          "name": "圖書館2F_資訊檢索區",
+          "file": "panos/圖書館二樓-圖書館2F_資訊檢索區.jpg",
+          "view": {
+            "yaw": -164.7,
+            "pitch": -3.9
+          },
+          "links": [
+            {
+              "to": "s-mw3ng973p9b",
+              "yaw": -160.6,
+              "pitch": -22.8
+            },
+            {
+              "to": "s-mw3ngc0yoty",
+              "yaw": 19.8,
+              "pitch": -31
+            },
+            {
+              "to": "s-mw3ng8n6nlq"
+            }
+          ],
+          "tags": [
+            {
+              "yaw": -153.1,
+              "pitch": 1,
+              "title": "圖書館2樓",
+              "text": "書庫4000冊\n討論室4間\n閱覽區\n小說區\n資料檢索區\n",
+              "images": []
+            }
+          ],
+          "x": 21.59,
+          "y": 16.41,
+          "heading": 296.9
+        },
+        {
+          "id": "s-mw3ngc0yoty",
+          "name": "圖書館2F_閱覽區",
+          "file": "panos/圖書館二樓-圖書館2F_閱覽區.jpg",
+          "view": {
+            "yaw": 0,
+            "pitch": 0
+          },
+          "links": [
+            {
+              "to": "s-mw3ng8xm4x9"
+            },
+            {
+              "to": "s-mw3ngb9eeq2"
+            },
+            {
+              "to": "s-mw3ng9hodjt",
+              "yaw": 142.1,
+              "pitch": -24
+            },
+            {
+              "yaw": -25.7,
+              "pitch": -26.7,
+              "to": "s-mw3ngbhkwtf"
+            }
+          ],
+          "tags": [],
+          "x": 16.56,
+          "y": 12.57,
+          "heading": 86.9
+        },
+        {
+          "id": "s-mw3ng8xm4x9",
+          "name": "圖書館2F_小說區",
+          "file": "panos/圖書館二樓-圖書館2F_小說區.jpg",
+          "view": {
+            "yaw": -43.9,
+            "pitch": 0.2
+          },
+          "links": [
+            {
+              "to": "s-mw3ngc0yoty"
+            },
+            {
+              "to": "s-mw3ng9hodjt"
+            },
+            {
+              "to": "s-mw3ng9ro277"
+            }
+          ],
+          "tags": [],
+          "x": 8.09,
+          "y": 10.4
+        },
+        {
+          "id": "s-mw3ng9hodjt",
+          "name": "圖書館2F_書庫",
+          "file": "panos/圖書館二樓-圖書館2F_書庫.jpg",
+          "view": {
+            "yaw": -26.2,
+            "pitch": 2.1
+          },
+          "links": [
+            {
+              "to": "s-mw3ng8xm4x9",
+              "yaw": -92.2,
+              "pitch": -19.3
+            },
+            {
+              "to": "s-mw3ng9ro277"
+            },
+            {
+              "to": "s-mw3ngb9eeq2"
+            },
+            {
+              "to": "s-mw3ngb0v585",
+              "yaw": 72.2,
+              "pitch": -32.6
+            },
+            {
+              "to": "s-mw3ngasjctt",
+              "yaw": 150.5,
+              "pitch": -37.5
+            },
+            {
+              "to": "s-mw3ngc0yoty"
+            }
+          ],
+          "tags": [],
+          "x": 12.95,
+          "y": 7.86,
+          "heading": 137.7
+        },
+        {
+          "id": "s-mw3ng9ro277",
+          "name": "圖書館2F_討論室一",
+          "file": "panos/圖書館二樓-圖書館2F_討論室一.jpg",
+          "view": {
+            "yaw": 0,
+            "pitch": 0
+          },
+          "links": [
+            {
+              "to": "s-mw3ng8xm4x9"
+            },
+            {
+              "to": "s-mw3ng9hodjt"
+            },
+            {
+              "to": "s-mw3ngasjctt"
+            }
+          ],
+          "tags": [],
+          "x": 2.05,
+          "y": 7.14
+        },
+        {
+          "id": "s-mw3ngasjctt",
+          "name": "圖書館2F_討論室二",
+          "file": "panos/圖書館二樓-圖書館2F_討論室二.jpg",
+          "view": {
+            "yaw": 0,
+            "pitch": 0
+          },
+          "links": [
+            {
+              "to": "s-mw3ng9ro277"
+            },
+            {
+              "to": "s-mw3ngb0v585"
+            },
+            {
+              "to": "s-mw3ng9hodjt"
+            }
+          ],
+          "tags": [],
+          "x": 7.29,
+          "y": 4.24
+        },
+        {
+          "id": "s-mw3ngb0v585",
+          "name": "圖書館2F_討論室三",
+          "file": "panos/圖書館二樓-圖書館2F_討論室三.jpg",
+          "view": {
+            "yaw": 0,
+            "pitch": 0
+          },
+          "links": [
+            {
+              "to": "s-mw3ngasjctt"
+            },
+            {
+              "to": "s-mw3ngb9eeq2"
+            },
+            {
+              "to": "s-mw3ng9hodjt"
+            }
+          ],
+          "tags": [],
+          "x": 13.01,
+          "y": 4.24
+        },
+        {
+          "id": "s-mw3ngb9eeq2",
+          "name": "圖書館2F_討論室四",
+          "file": "panos/圖書館二樓-圖書館2F_討論室四.jpg",
+          "view": {
+            "yaw": 0,
+            "pitch": 0
+          },
+          "links": [
+            {
+              "to": "s-mw3ngb0v585"
+            },
+            {
+              "to": "s-mw3ng9hodjt"
+            },
+            {
+              "to": "s-mw3ngc0yoty"
+            }
+          ],
+          "tags": [],
+          "x": 18.15,
+          "y": 4.43
+        }
+      ],
+      "plan": {
+        "image": "plans/area-mw3neruul9n-mw3num1q.jpg",
+        "imgW": 562,
+        "imgH": 438,
+        "scale": 0.0687816
+      }
+    }
+  ]
+}
