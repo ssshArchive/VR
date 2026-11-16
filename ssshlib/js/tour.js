@@ -378,16 +378,16 @@ export class Navigator {
     const from = this.current;
     try {
       const zoom = this.viewer.getZoomLevel();
+      const near = Math.min(100, zoom + 12);
+      const lookPitch = rad(Math.max(-12, Math.min(8, g.pitch)));
       this.hideCursor();
-      await this.viewer.animate({
-        yaw: rad(g.yaw),
-        pitch: rad(Math.max(-12, Math.min(8, g.pitch))),
-        zoom: Math.min(100, zoom + 12),
-        speed: 600,
-      });
+      await this.viewer.animate({ yaw: rad(g.yaw), pitch: lookPitch, zoom: near, speed: 600 });
       this.markers.clearMarkers();
-      await this.show(t, arrivalPosition(this.tour, from, t, link), { speed: 700, rotation: false, effect: 'fade' }, zoom);
+      // 新場景用「剛才推近、低頭」的同一個姿勢淡入，再慢慢退回正常視角，避免畫面彈一下
+      const arrive = arrivalPosition(this.tour, from, t, link);
+      await this.show(t, { yaw: arrive.yaw, pitch: lookPitch }, { speed: 700, rotation: false, effect: 'fade' }, near);
       this.arrivedBy = { from: from.id, index: (from.links || []).indexOf(link) };   // 編輯器「設為進入視角」用
+      await this.viewer.animate({ yaw: arrive.yaw, pitch: arrive.pitch, zoom, speed: 900 });
     } catch (e) {
       console.error(e);
       this.refresh();

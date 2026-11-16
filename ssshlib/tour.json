@@ -1,6 +1,6 @@
 {
   "title": "環景導覽",
-  "cameraHeight": 1.5,
+  "cameraHeight": 1.2,
   "start": "s-mw669klcl0r",
   "areas": [
     {
@@ -17,9 +17,6 @@
             "pitch": 0
           },
           "links": [
-            {
-              "to": "s-mw3ng8n6nlq"
-            },
             {
               "to": "s-mw3ng973p9b",
               "yaw": -12.6,
@@ -39,17 +36,7 @@
             "yaw": 33.2,
             "pitch": -9.6
           },
-          "links": [
-            {
-              "to": "s-mw3ngbhkwtf"
-            },
-            {
-              "to": "s-mw3ng8n6nlq"
-            },
-            {
-              "to": "s-mw3ngbqdkn9"
-            }
-          ],
+          "links": [],
           "tags": [],
           "x": 32.31,
           "y": 13.7
@@ -62,14 +49,7 @@
             "yaw": 126.5,
             "pitch": -2.5
           },
-          "links": [
-            {
-              "to": "s-mw3ng973p9b"
-            },
-            {
-              "to": "s-mw3ngbqdkn9"
-            }
-          ],
+          "links": [],
           "tags": [],
           "x": 32.04,
           "y": 20.41,
@@ -90,14 +70,14 @@
               "pitch": -22.8
             },
             {
-              "to": "s-mw3ngc0yoty",
-              "yaw": 19.8,
-              "pitch": -31
-            },
-            {
               "yaw": 83.7,
               "pitch": -17.5,
               "to": "s-mw669l3he7y"
+            },
+            {
+              "to": "s-mwhfr2qisp6",
+              "yaw": -131.9,
+              "pitch": -19.2
             }
           ],
           "tags": [
@@ -114,6 +94,52 @@
           "heading": 296.9
         },
         {
+          "id": "s-mwhfr2qisp6",
+          "name": "圖書館2F_櫃台",
+          "file": "panos/圖書館二樓/圖書館2F_櫃台.jpg",
+          "view": {
+            "yaw": 0,
+            "pitch": 0
+          },
+          "links": [
+            {
+              "yaw": -55.2,
+              "pitch": -20.9,
+              "to": "s-mw3ngbhkwtf"
+            },
+            {
+              "yaw": -148.2,
+              "pitch": -20.8,
+              "to": "s-mwhg8t89txm"
+            }
+          ],
+          "tags": [],
+          "x": 23.28,
+          "y": 11.95,
+          "heading": 69.6
+        },
+        {
+          "id": "s-mwhg8t89txm",
+          "name": "圖書館2F_櫃台右",
+          "file": "panos/圖書館二樓/圖書館2F_櫃台右.jpg",
+          "view": {
+            "yaw": 0,
+            "pitch": 0
+          },
+          "links": [
+            {
+              "yaw": 170,
+              "pitch": -27.4,
+              "to": "s-mwhgl10elhp"
+            }
+          ],
+          "tags": [],
+          "transit": true,
+          "x": 18.28,
+          "y": 7.74,
+          "heading": 351.7
+        },
+        {
           "id": "s-mw3ngc0yoty",
           "name": "圖書館2F_閱覽區",
           "file": "panos/圖書館二樓/圖書館2F_閱覽區.jpg",
@@ -123,23 +149,20 @@
           },
           "links": [
             {
-              "to": "s-mw3ng8xm4x9"
-            },
-            {
-              "to": "s-mw3ngb9eeq2"
-            },
-            {
               "to": "s-mw3ng9hodjt",
               "yaw": 142.1,
               "pitch": -24
-            },
-            {
-              "yaw": -25.7,
-              "pitch": -26.7,
-              "to": "s-mw3ngbhkwtf"
             }
           ],
-          "tags": [],
+          "tags": [
+            {
+              "yaw": 96.5,
+              "pitch": 1.4,
+              "title": "校慶展覽",
+              "text": "測試",
+              "images": []
+            }
+          ],
           "x": 19.34,
           "y": 13.13,
           "heading": 86.9
@@ -152,17 +175,7 @@
             "yaw": -43.9,
             "pitch": 0.2
           },
-          "links": [
-            {
-              "to": "s-mw3ngc0yoty"
-            },
-            {
-              "to": "s-mw3ng9hodjt"
-            },
-            {
-              "to": "s-mw3ng9ro277"
-            }
-          ],
+          "links": [],
           "tags": [],
           "x": 8.54,
           "y": 10.98
@@ -182,12 +195,6 @@
               "pitch": -19.3
             },
             {
-              "to": "s-mw3ng9ro277"
-            },
-            {
-              "to": "s-mw3ngb9eeq2"
-            },
-            {
               "to": "s-mw3ngb0v585",
               "yaw": 72.2,
               "pitch": -32.6
@@ -196,9 +203,6 @@
               "to": "s-mw3ngasjctt",
               "yaw": 150.5,
               "pitch": -37.5
-            },
-            {
-              "to": "s-mw3ngc0yoty"
             }
           ],
           "tags": [],
@@ -214,20 +218,10 @@
             "yaw": 0,
             "pitch": 0
           },
-          "links": [
-            {
-              "to": "s-mw3ng8xm4x9"
-            },
-            {
-              "to": "s-mw3ng9hodjt"
-            },
-            {
-              "to": "s-mw3ngasjctt"
-            }
-          ],
+          "links": [],
           "tags": [],
-          "x": 2.16,
-          "y": 7.54
+          "x": 1.48,
+          "y": 6.87
         },
         {
           "id": "s-mw3ngasjctt",
@@ -237,20 +231,10 @@
             "yaw": 0,
             "pitch": 0
           },
-          "links": [
-            {
-              "to": "s-mw3ng9ro277"
-            },
-            {
-              "to": "s-mw3ngb0v585"
-            },
-            {
-              "to": "s-mw3ng9hodjt"
-            }
-          ],
+          "links": [],
           "tags": [],
-          "x": 7.7,
-          "y": 4.48
+          "x": 6.89,
+          "y": 2.89
         },
         {
           "id": "s-mw3ngb0v585",
@@ -260,20 +244,10 @@
             "yaw": 0,
             "pitch": 0
           },
-          "links": [
-            {
-              "to": "s-mw3ngasjctt"
-            },
-            {
-              "to": "s-mw3ngb9eeq2"
-            },
-            {
-              "to": "s-mw3ng9hodjt"
-            }
-          ],
+          "links": [],
           "tags": [],
-          "x": 13.73,
-          "y": 4.48
+          "x": 12.93,
+          "y": 2.27
         },
         {
           "id": "s-mw3ngb9eeq2",
@@ -285,24 +259,72 @@
           },
           "links": [
             {
-              "to": "s-mw3ngb0v585"
-            },
-            {
-              "to": "s-mw3ng9hodjt"
-            },
-            {
-              "to": "s-mw3ngc0yoty"
-            },
-            {
               "yaw": -13.6,
               "pitch": -1.6,
-              "to": "s-mw3ngbhkwtf",
+              "to": "s-mwhgl1e1qob",
               "arrow": 270
             }
           ],
           "tags": [],
-          "x": 19.16,
-          "y": 4.68
+          "x": 19.66,
+          "y": 1.99
+        },
+        {
+          "id": "s-mwhgl10elhp",
+          "name": "圖書館2F_討論室四書庫",
+          "file": "panos/圖書館二樓/圖書館2F_討論室四書庫.jpg",
+          "view": {
+            "yaw": 0,
+            "pitch": 0
+          },
+          "links": [
+            {
+              "yaw": -79.1,
+              "pitch": -22.8,
+              "to": "s-mwhg8t89txm"
+            },
+            {
+              "yaw": -177.5,
+              "pitch": -25.6,
+              "to": "s-mwhgl1e1qob"
+            },
+            {
+              "yaw": -75,
+              "pitch": -21.1,
+              "to": "s-mwhg8t89txm"
+            }
+          ],
+          "tags": [],
+          "transit": true,
+          "x": 20.88,
+          "y": 3.53,
+          "heading": 85.1
+        },
+        {
+          "id": "s-mwhgl1e1qob",
+          "name": "圖書館2F_討論室四書庫前",
+          "file": "panos/圖書館二樓/圖書館2F_討論室四書庫前.jpg",
+          "view": {
+            "yaw": 0,
+            "pitch": 0
+          },
+          "links": [
+            {
+              "yaw": -4.1,
+              "pitch": -23.9,
+              "to": "s-mwhgl10elhp"
+            },
+            {
+              "yaw": 72.6,
+              "pitch": -33.1,
+              "to": "s-mw3ngb9eeq2"
+            }
+          ],
+          "tags": [],
+          "transit": true,
+          "x": 18.25,
+          "y": 3.47,
+          "heading": 89.7
         }
       ],
       "plan": {
@@ -333,8 +355,8 @@
           "name": "圖書館1F_松語軒",
           "file": "panos/圖書館一樓/圖書館1F_松語軒.jpg",
           "view": {
-            "yaw": 0,
-            "pitch": 0
+            "yaw": 169.4,
+            "pitch": -10.9
           },
           "links": [
             {
